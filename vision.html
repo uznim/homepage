@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            body {
+                color:#CCCCCC;
+            }
+            #c2 {
+                background-image: url('./foo.png');
+                background-repeat : no-repeat;
+            }
+            div {
+                float:left;
+                border : 1px solid #444444;
+            }
+        </style>
+        <script type="text/javascript">
+            var processor={};
+
+            processor.doLoad = function() {
+                this.video = document.getElementById('video');
+                this.c1 = document.getElementById('c1');
+                this.ctx1 = this.c1.getContext('2d');
+                this.c2 = document.getElementById('c2');
+                this.ctx2 = this.c2.getContext('2d');
+                let self = this;
+                this.video.addEventListener('play',function() {
+                    self.width = self.video.videoWidth/2;
+                    self.height = self.video.videoHeight/2;
+                    self.timerCallback();
+                },false)//,로 돼있는데 ;로 함
+
+
+                // image 부분 써봄
+                this.c3 = document.getElementById('c3');
+                this.ctx3 = this.c3.getContext('2d');
+                this.ctx3.beginPath();
+                this.ctx3.arc(95,50,40,0,2*Math.PI);
+                this.ctx3.stroke();
+            },
+
+            processor.timerCallback = function timerCallback() {
+                if(this.video.paused || this.video.ended) {
+                    return;
+                }
+                this.computeFrame();
+                let self = this;
+                setTimeout(function() {
+                    self.timerCallback();
+                },0);
+            }, // 이것도 ,를 ;로함
+
+            processor.computeFrame = function computeFrame() {
+                this.ctx1.drawImage(this.video,0,0,this.width,this.height);
+                let frame = this.ctx1.getImageData(0,0,this.width,this.height);
+
+                for (var i=0; i<frame.data.length; i+=4) {
+
+                    var avg = (frame.data[i]+frame.data[i+1]+frame.data[i+2])/3;
+                    frame.data[i] = avg;
+                    frame.data[i+1] = avg;
+                    frame.data[i+2] = avg;
+
+
+                }
+                this.ctx2.putImageData(frame,0,0);
+                return;
+            }
+            
+            document.getElementById("image").onload = function() {
+                /*
+                var c3 = document.getElementById("c3"); 
+                var ctx3 = c3.getContext('2d');
+                var image = document.getElementById("image");
+                ctx3.drawImage(image,0,0);
+                var imgData = ctx3.getImageData(0,0,c3.width, c3.height);
+
+                var j;
+                for (j=0; j<imgData.data.length; j+=4) {
+                    imgData.data[j] = 255-imgData.data[j];
+                    imgData.data[j+1] = 255-imgData.data[j+1];
+                    imgData.data[j+2] = 255-imgData.data[j+2];
+                }
+                ctx3.putImageData(imgData,0,0);*/
+                var canvas = document.getElementById("c3");
+                var ctx3 = canvas.getContext('2d');
+                ctx.beginPath();
+                ctx.arc(95,50,40,0,2*Math.PI);
+                ctx.stroke();
+
+            }
+        </script>
+    </head>
+
+    <body onload = "processor.doLoad()">
+        <div>
+            <video id = "video" src = "./movieVideo.mp4" controls="true"/>
+        </div>
+        <div>
+            <canvas id = "c1" width = "320" height = "192"></canvas>
+            <canvas id = "c2" width = "320" height = "192"></canvas>
+            <br>
+            <p>left : ctx1 / right : ctx2</p>
+            <img id = "image" src="./img_the_scream.jpg" width="320" height="192"></img> 
+            <canvas id = "c3" width="320" height="192"></canvas>
+        </div>
+
+
+    </body>
+</html>
